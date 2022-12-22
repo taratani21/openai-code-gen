@@ -12,12 +12,13 @@ export class OpenAIQuery extends OpenAIApi {
   public async refactorSelectedCode(textEditor: vscode.TextEditor) {
     // Get the selected text in the provided text editor
     const selectedText = this.getSelectedText(textEditor);
+    const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
-      instruction: "Refactor this code and describe the changes you made",
+      instruction: "Refactor the code below",
       userInput: selectedText,
-      inputHeader: "Original Python Code",
-      outputHeader: "Refactored Python Code",
+      inputHeader: `Original ${languageId} code`,
+      outputHeader: `Refactored ${languageId} code`,
       delimeter: "###"
     });
 
@@ -31,12 +32,13 @@ export class OpenAIQuery extends OpenAIApi {
   public async showBugs(textEditor: vscode.TextEditor) {
     // Get the selected text in the provided text editor
     const selectedText = this.getSelectedText(textEditor);
+    const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
       instruction: "Fix bugs in the below code",
       userInput: selectedText,
-      inputHeader: "Buggy Python Code",
-      outputHeader: "Fixed Python Code",
+      inputHeader: `Original ${languageId} code`,
+      outputHeader: `Fixed ${languageId} code`,
       delimeter: "###"
     });
 
@@ -50,12 +52,13 @@ export class OpenAIQuery extends OpenAIApi {
   public async addCommentsToSelectedCode(textEditor: vscode.TextEditor) {
     // Get the selected text in the provided text editor
     const selectedText = this.getSelectedText(textEditor);
+    const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
       instruction: "Add comments to the below code",
       userInput: selectedText,
-      inputHeader: "Uncommented code",
-      outputHeader: "Commented code",
+      inputHeader: `${languageId} code`,
+      outputHeader: `Commentated ${languageId} code`,
       delimeter: "###"
     });
   
@@ -68,12 +71,13 @@ export class OpenAIQuery extends OpenAIApi {
   public async generateUnitTestForSelectedCode(textEditor: vscode.TextEditor) {
     // Get the selected text in the provided text editor
     const selectedText = this.getSelectedText(textEditor);
+    const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
       instruction: "Write a unit test for the below code",
       userInput: selectedText,
-      inputHeader: "Code block",
-      outputHeader: "Unit Test",
+      inputHeader: `${languageId} code block`,
+      outputHeader: `Unit test for ${languageId} code block`,
       delimeter: "###"
     });
 

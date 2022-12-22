@@ -2,16 +2,23 @@ import { OpenAIQuery } from './classes/open-ai-query';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-	let apiKey: string | undefined = vscode.workspace.getConfiguration('openaicodegen').get('apiKey');
-	if (!apiKey) {
-		vscode.window.showInputBox({
-			placeHolder: 'Enter your OpenAI API key',
-			prompt: 'Enter your OpenAI API key'
-		}).then((value) => {
-			apiKey = value ? value : '';
-			vscode.workspace.getConfiguration('openaicodegen').update('apiKey', apiKey, true);
-		});
-	}
+	// Declare a variable to store the API key
+  let apiKey: string | undefined;
+
+  // Check if the API key is already set in the configuration
+  const configApiKey = vscode.workspace.getConfiguration('openaicodegen').get('apiKey') as string | undefined;
+  if (configApiKey) {
+    apiKey = configApiKey;
+  } else {
+    // If the API key is not set, ask the user to input it
+    vscode.window.showInputBox({
+      placeHolder: 'Enter your OpenAI API key',
+      prompt: 'Enter your OpenAI API key'
+    }).then((value) => {
+      apiKey = value ? value : '';
+      vscode.workspace.getConfiguration('openaicodegen').update('apiKey', apiKey, true);
+    });
+  }
 
   context.subscriptions.push(vscode.commands.registerCommand('openaicodegen.refactorCode', async () => {
     // Get the active text editor
