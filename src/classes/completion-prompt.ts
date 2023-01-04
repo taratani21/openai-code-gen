@@ -1,4 +1,4 @@
-import { ICompletionPromptParameters } from "../interfaces/completion-prompt-parameters";
+import { ICompletionPromptParameters } from '../interfaces/completion-prompt-parameters';
 
 export class CompletionPrompt implements ICompletionPromptParameters {
   

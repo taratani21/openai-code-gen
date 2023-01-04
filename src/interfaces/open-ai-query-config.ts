@@ -1,3 +1,5 @@
-import { ConfigurationParameters } from "openai";
+import { ConfigurationParameters } from 'openai';
 
-export interface OpenAIQueryConfig extends ConfigurationParameters {}
+export interface OpenAIQueryConfig extends ConfigurationParameters {
+  maxTokens?: number;
+}

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Configuration, CreateCompletionRequest, OpenAIApi } from "openai";
-import * as vscode from "vscode";
-import { OpenAIQueryConfig } from "../interfaces/open-ai-query-config";
-import { CompletionPrompt } from "./completion-prompt";
+import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
+import * as vscode from 'vscode';
+import { OpenAIQueryConfig } from '../interfaces/open-ai-query-config';
+import { CompletionPrompt } from './completion-prompt';
 
 export class OpenAIQuery extends OpenAIApi {
   constructor(config: OpenAIQueryConfig) {
@@ -15,11 +15,11 @@ export class OpenAIQuery extends OpenAIApi {
     const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
-      instruction: "Refactor the code below",
+      instruction: 'Refactor the code below',
       userInput: selectedText,
       inputHeader: `Original ${languageId} code`,
       outputHeader: `Refactored ${languageId} code`,
-      delimeter: "###"
+      delimeter: '###'
     });
 
     // Use the OpenAI API to request a refactored version of the selected code
@@ -35,11 +35,11 @@ export class OpenAIQuery extends OpenAIApi {
     const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
-      instruction: "Fix bugs in the below code",
+      instruction: 'Fix bugs in the below code',
       userInput: selectedText,
       inputHeader: `Original ${languageId} code`,
       outputHeader: `Fixed ${languageId} code`,
-      delimeter: "###"
+      delimeter: '###'
     });
 
     // Use the OpenAI API to request a list of bugs in the selected code
@@ -55,11 +55,11 @@ export class OpenAIQuery extends OpenAIApi {
     const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
-      instruction: "Add comments to the below code",
+      instruction: 'Add comments to the below code',
       userInput: selectedText,
       inputHeader: `${languageId} code`,
       outputHeader: `Commentated ${languageId} code`,
-      delimeter: "###"
+      delimeter: '###'
     });
   
     // Use the OpenAI API to request comments for the selected code
@@ -74,11 +74,11 @@ export class OpenAIQuery extends OpenAIApi {
     const languageId = textEditor.document.languageId;
 
     const completionPrompt = new CompletionPrompt({
-      instruction: "Write a unit test for the below code",
+      instruction: 'Write a unit test for the below code',
       userInput: selectedText,
       inputHeader: `${languageId} code block`,
       outputHeader: `Unit test for ${languageId} code block`,
-      delimeter: "###"
+      delimeter: '###'
     });
 
     // Use the OpenAI API to request unit tests for the selected code
@@ -87,7 +87,7 @@ export class OpenAIQuery extends OpenAIApi {
     this.displayTextInNewTab(unitTests);
   } 
 
-  private async createRequest(prompt: string, model: string = 'code-davinci-002') {
+  private async createRequest(prompt: string, model = 'code-davinci-002') {
 
     // Create a completion request for the OpenAI API
     const request: CreateCompletionRequest = {
@@ -98,7 +98,7 @@ export class OpenAIQuery extends OpenAIApi {
       top_p: 1.0,
       frequency_penalty: 0.0,
       presence_penalty: 0.0,
-      stop: ["###"],
+      stop: ['###'],
       best_of: 1,
     };
   
@@ -131,7 +131,8 @@ export class OpenAIQuery extends OpenAIApi {
     const diff = vscode.TextEdit.replace(new vscode.Range(0, 0, 0, text1.length), text2);
 
     // show diff in new tab
-    const newUri = vscode.Uri.parse('untitled:/text.txt');
+    const newUri =
+    vscode.Uri.parse('untitled:/text.txt');
     const newDocument =  await vscode.workspace.openTextDocument(newUri);
     const edit = new vscode.WorkspaceEdit();
     edit.set(newUri, [diff]);
