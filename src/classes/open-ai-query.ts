@@ -106,7 +106,7 @@ export class OpenAIQuery extends OpenAIApi {
     const response = await this.createCompletion(request);
   
     // Extract the comments from the response
-    return response.data.choices[0].text || '';
+    return response.data.choices[0].text?.trim() || '';
   }
 
   private async displayTextInNewTab(text: string) {
@@ -124,7 +124,19 @@ export class OpenAIQuery extends OpenAIApi {
     await vscode.workspace.applyEdit(edit);
   
     // Open the new text document in a new tab
-    vscode.window.showTextDocument(newDocument);
+    vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
+  }
+
+  async displayDifferencesBetweenTexts(text1: string, text2: string) {
+    const diff = vscode.TextEdit.replace(new vscode.Range(0, 0, 0, text1.length), text2);
+
+    // show diff in new tab
+    const newUri = vscode.Uri.parse('untitled:/text.txt');
+    const newDocument =  await vscode.workspace.openTextDocument(newUri);
+    const edit = new vscode.WorkspaceEdit();
+    edit.set(newUri, [diff]);
+    await vscode.workspace.applyEdit(edit);
+    vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
   }
 
   private getSelectedText(textEditor: vscode.TextEditor): string {
