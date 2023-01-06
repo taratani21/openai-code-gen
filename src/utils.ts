@@ -1,6 +1,46 @@
 import * as vscode from 'vscode';
 import { ICompletionPromptParameters } from './interfaces/completion-prompt-parameters';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function setConfValue(key: string, value: any): Thenable<void> {
+  return vscode.workspace.getConfiguration('openaicodegen').update(key, value, true);
+}
+
+export function getConfValue<T>(key: string): T {
+  return vscode.workspace.getConfiguration('openaicodegen').get(key) as T;
+}
+
+export async function getApiKey(): Promise<string> {
+  // Check if the API key is already set in the configuration
+  let configApiKey = getConfValue<string>('apiKey');
+  if (!configApiKey) {
+    // If the API key is not set, ask the user to input it
+    await vscode.window.showInputBox({
+      placeHolder: 'Enter your OpenAI API key',
+      prompt: 'Enter your OpenAI API key'
+    }).then((value) => {
+      configApiKey = value ? value : '';
+      setConfValue('apiKey', configApiKey);
+    });
+  }
+
+  return configApiKey;
+}
+
+export function getSelectedText(): string {
+  const textEditor = vscode.window.activeTextEditor;
+  return textEditor ? textEditor.document.getText(textEditor.selection) : '';
+}
+
+export function getActiveLanguageId(): string {
+  const textEditor = vscode.window.activeTextEditor;
+  return textEditor ? textEditor.document.languageId : '';
+}
+
+export function generateCompletionPrompt(parameters: ICompletionPromptParameters): string {
+  return `##### ${parameters.instruction}\n\n${parameters.delimeter} ${parameters.inputHeader}\n${parameters.userInput}\n\n${parameters.delimeter} ${parameters.outputHeader}`;
+}
+
 export async function displayTextInNewTab(text: string) {
   // Create a new URI for the text document
   const newUri = vscode.Uri.parse('untitled:/text.txt');
@@ -29,18 +69,4 @@ export async function displayDifferencesBetweenTexts(text1: string, text2: strin
   edit.set(newUri, [diff]);
   await vscode.workspace.applyEdit(edit);
   vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
-}
-
-export function getSelectedText(): string {
-  const textEditor = vscode.window.activeTextEditor;
-  return textEditor ? textEditor.document.getText(textEditor.selection) : '';
-}
-
-export function getActiveLanguageId(): string {
-  const textEditor = vscode.window.activeTextEditor;
-  return textEditor ? textEditor.document.languageId : '';
-}
-
-export function generateCompletionPrompt(parameters: ICompletionPromptParameters): string {
-  return `##### ${parameters.instruction}\n\n${parameters.delimeter} ${parameters.inputHeader}\n${parameters.userInput}\n\n${parameters.delimeter} ${parameters.outputHeader}`;
 }

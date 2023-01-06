@@ -17,10 +17,6 @@
         "title": "OpenAI: Refactor Code"
       },
       {
-        "command": "openaicodegen.showBugs",
-        "title": "OpenAI: Show Bugs"
-      },
-      {
         "command": "openaicodegen.addComments",
         "title": "OpenAI: Add Comments"
       },
@@ -33,10 +29,6 @@
       "editor/context": [
         {
           "command": "openaicodegen.refactorCode",
-          "group": "openaicodegen"
-        },
-        {
-          "command": "openaicodegen.showBugs",
           "group": "openaicodegen"
         },
         {

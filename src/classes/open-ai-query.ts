@@ -25,23 +25,6 @@ export class OpenAIQuery extends OpenAIApi {
     return this.sendRequest(completionPrompt);
   }
 
-  public async showBugsForSelectedCode() {
-    // Get the selected text in the provided text editor
-    const languageId = getActiveLanguageId();
-
-    // generate completion prompt
-    const completionPrompt = generateCompletionPrompt({
-      instruction: 'Fix bugs in the below code',
-      userInput: getSelectedText(),
-      inputHeader: `Original ${languageId} code`,
-      outputHeader: `Fixed ${languageId} code`,
-      delimeter: '###'
-    })
-
-    // Use the OpenAI API to request a list of bugs in the selected code
-    return this.sendRequest(completionPrompt);
-  }
-
   public async addCommentsToSelectedCode() {
     // Get the selected text in the provided text editor
     const languageId = getActiveLanguageId();
