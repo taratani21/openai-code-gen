@@ -1,5 +1,47 @@
 import { OpenAIQuery } from './classes/open-ai-query';
 import * as vscode from 'vscode';
+import { ICommandConfig } from './interfaces/command-config';
+import { displayTextInNewTab } from './utils';
+
+const OpenAICommands: ICommandConfig[] = [
+	{
+		command: 'openaicodegen.refactorCode',
+		callback: refactorCodeCallback
+	},
+	{
+		command: 'openaicodegen.showBugs',
+		callback: showBugsCallback
+	},
+	{
+		command: 'openaicodegen.addComments',
+		callback: addCommentsCallback
+	},
+	{
+		command: 'openaicodegen.generateUnitTest',
+		callback: generateUnitTestCallback
+	}
+];
+
+
+async function refactorCodeCallback(openAIQuery: OpenAIQuery) {
+	const result = await openAIQuery.refactorSelectedCode();
+	displayTextInNewTab(result);
+}
+
+async function showBugsCallback(openAIQuery: OpenAIQuery) {
+	const result = await openAIQuery.showBugsForSelectedCode();
+	displayTextInNewTab(result);
+}
+
+async function addCommentsCallback(openAIQuery: OpenAIQuery) {
+	const result = await openAIQuery.addCommentsToSelectedCode();
+	displayTextInNewTab(result);
+}
+
+async function generateUnitTestCallback(openAIQuery: OpenAIQuery) {	
+	const result = await openAIQuery.generateUnitTestForSelectedCode();
+	displayTextInNewTab(result);
+}
 
 export function activate(context: vscode.ExtensionContext) {
 	// Declare a variable to store the API key
@@ -20,59 +62,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
   }
 
-  context.subscriptions.push(vscode.commands.registerCommand('openaicodegen.refactorCode', async () => {
-    // Get the active text editor
-    const textEditor = vscode.window.activeTextEditor;
-    if (!textEditor) {
-      return;
-    }
-
-    // Use the OpenAIQuery class to request a refactored version of the selected code
-    const openAIQuery = new OpenAIQuery({
-			apiKey: apiKey
+	OpenAICommands.forEach((command) => {
+		const disposable = vscode.commands.registerCommand(command.command, () => {
+			const openAIQuery = new OpenAIQuery({ apiKey });
+			command.callback(openAIQuery);
 		});
-    openAIQuery.refactorSelectedCode(textEditor);
-  }));
-
-	context.subscriptions.push(vscode.commands.registerCommand('openaicodegen.showBugs', async () => {
-		// Get the active text editor
-		const textEditor = vscode.window.activeTextEditor;
-		if (!textEditor) {
-			return;
-		}
-
-		// Use the OpenAIQuery class to request a list of bugs in the selected code
-		const openAIQuery = new OpenAIQuery({
-			apiKey: apiKey
-		});
-		openAIQuery.showBugs(textEditor);
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('openaicodegen.addComments', async () => {
-		// Get the active text editor
-		const textEditor = vscode.window.activeTextEditor;
-		if (!textEditor) {
-			return;
-		}
-
-		// Use the OpenAIQuery class to request comments for the selected code
-		const openAIQuery = new OpenAIQuery({
-			apiKey: apiKey
-		});
-		openAIQuery.addCommentsToSelectedCode(textEditor);
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('openaicodegen.generateUnitTest', async () => {
-		// Get the active text editor
-		const textEditor = vscode.window.activeTextEditor;
-		if (!textEditor) {
-			return;
-		}
-
-		// Use the OpenAIQuery class to request comments for the selected code
-		const openAIQuery = new OpenAIQuery({
-			apiKey: apiKey
-		});
-		openAIQuery.generateUnitTestForSelectedCode(textEditor);
-	}));
+		context.subscriptions.push(disposable);
+	});
 }
