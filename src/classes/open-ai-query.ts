@@ -33,8 +33,8 @@ export class OpenAIQuery extends OpenAIApi {
     const completionPrompt = generateCompletionPrompt({
         instruction: 'Add comments to the below code', 
         userInput: getSelectedText(),
-        inputHeader: `${languageId} code`,
-        outputHeader: `Commentated ${languageId} code`,
+        inputHeader: `Uncommented ${languageId} code`,
+        outputHeader: `Commented ${languageId} code`,
         delimeter: '###'
     });
   
