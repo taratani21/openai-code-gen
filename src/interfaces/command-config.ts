@@ -3,5 +3,5 @@ import { OpenAIQuery } from '../classes/open-ai-query';
 
 export interface ICommandConfig {
   command: string;
-  callback: (query: OpenAIQuery) => any;
+  callback: (query: OpenAIQuery) => Promise<any>;
 }

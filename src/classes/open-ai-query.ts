@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
-import { OpenAIQueryConfig } from '../interfaces/open-ai-query-config';
-import { createDiscreteProgressStatus, generateCompletionPrompt, getActiveLanguageId, getMaxTokens, getModel, getSelectedText, getTemperature } from '../utils';
+import * as vscode from 'vscode';
+import { Configuration, ConfigurationParameters, CreateCompletionRequest, OpenAIApi } from 'openai';
+import { createDiscreteProgressStatus, generateCompletionPrompt, getActiveLanguageId, getCodeModel, getMaxTokens, getSelectedText, getTemperature, getTextModel } from '../utils';
 
 export class OpenAIQuery extends OpenAIApi {
-  constructor(config: OpenAIQueryConfig) {
+  constructor(config: ConfigurationParameters) {
     super(new Configuration(config));
   }
 
@@ -59,10 +59,10 @@ export class OpenAIQuery extends OpenAIApi {
     return this.sendRequest(completionPrompt);
   } 
 
-  private async sendRequest(prompt: string) {
+  async sendRequest(prompt: string, codeCompletion = true) {
     // Create a completion request for the OpenAI API
     const request: CreateCompletionRequest = {
-      model: getModel(),
+      model: codeCompletion ? getCodeModel() : getTextModel(),
       prompt: prompt,
       temperature: getTemperature(),
       max_tokens: getMaxTokens(),
@@ -76,11 +76,13 @@ export class OpenAIQuery extends OpenAIApi {
     const progressStatus = createDiscreteProgressStatus();
   
     // Use the OpenAI API to request comments for the code
-    const response = await this.createCompletion(request);
-
-    progressStatus.dispose();
+    const response = await this.createCompletion(request)
+      .catch((error) => {
+        vscode.window.showErrorMessage(error.message);
+      })
+      .finally(() => progressStatus.dispose());
   
     // Extract the comments from the response
-    return response.data.choices[0].text?.trim() || '';
+    return response?.data.choices[0].text?.trim() || '';
   }
 }

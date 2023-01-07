@@ -15,6 +15,10 @@ const OpenAICommands: ICommandConfig[] = [
   {
     command: 'openaicodegen.generateUnitTest',
     callback: generateUnitTest
+  },
+  {
+    command: 'openaicodegen.sendTextRequest',
+    callback: sendTextRequest
   }
 ];
 
@@ -30,6 +34,17 @@ async function addComments(openAIQuery: OpenAIQuery) {
 
 async function generateUnitTest(openAIQuery: OpenAIQuery) {
   const result = await openAIQuery.generateUnitTestForSelectedCode();
+  displayTextInNewTab(result);
+}
+
+async function sendTextRequest(openAIQuery: OpenAIQuery) {
+  // Ask user for prompt
+  const prompt = await vscode.window.showInputBox({
+    placeHolder: 'Enter your prompt',
+    prompt: 'Enter your prompt'
+  });
+
+  const result = await openAIQuery.sendRequest(`${prompt}\n###`, false);
   displayTextInNewTab(result);
 }
 

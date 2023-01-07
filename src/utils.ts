@@ -27,8 +27,12 @@ export async function getApiKey(): Promise<string> {
   return configApiKey;
 }
 
-export function getModel(): string {
-  return getConfValue<string>('model');
+export function getCodeModel(): string {
+  return getConfValue<string>('codeModel');
+}
+
+export function getTextModel(): string {
+  return getConfValue<string>('textModel');
 }
 
 export function getMaxTokens(): number {
