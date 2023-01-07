@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
 import { OpenAIQueryConfig } from '../interfaces/open-ai-query-config';
-import { generateCompletionPrompt, getActiveLanguageId, getSelectedText } from '../utils';
+import { createDiscreteProgressStatus, generateCompletionPrompt, getActiveLanguageId, getSelectedText } from '../utils';
 
 export class OpenAIQuery extends OpenAIApi {
   constructor(config: OpenAIQueryConfig) {
@@ -60,7 +60,6 @@ export class OpenAIQuery extends OpenAIApi {
   } 
 
   private async sendRequest(prompt: string, model = 'code-davinci-002') {
-
     // Create a completion request for the OpenAI API
     const request: CreateCompletionRequest = {
       model: model,
@@ -73,9 +72,13 @@ export class OpenAIQuery extends OpenAIApi {
       stop: ['###'],
       best_of: 1,
     };
+
+    const progressStatus = createDiscreteProgressStatus();
   
     // Use the OpenAI API to request comments for the code
     const response = await this.createCompletion(request);
+
+    progressStatus.dispose();
   
     // Extract the comments from the response
     return response.data.choices[0].text?.trim() || '';

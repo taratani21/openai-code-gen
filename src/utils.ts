@@ -70,3 +70,11 @@ export async function displayDifferencesBetweenTexts(text1: string, text2: strin
   await vscode.workspace.applyEdit(edit);
   vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
 }
+
+export function createDiscreteProgressStatus(message = 'Fetching OpenAI results...'): vscode.StatusBarItem {
+  const progressStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+  progressStatus.text = `$(sync~spin) ${message}`;
+  progressStatus.show();
+
+  return progressStatus;
+}
