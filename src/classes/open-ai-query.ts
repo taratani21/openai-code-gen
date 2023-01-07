@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
 import { OpenAIQueryConfig } from '../interfaces/open-ai-query-config';
-import { createDiscreteProgressStatus, generateCompletionPrompt, getActiveLanguageId, getSelectedText } from '../utils';
+import { createDiscreteProgressStatus, generateCompletionPrompt, getActiveLanguageId, getMaxTokens, getModel, getSelectedText, getTemperature } from '../utils';
 
 export class OpenAIQuery extends OpenAIApi {
   constructor(config: OpenAIQueryConfig) {
@@ -59,13 +59,13 @@ export class OpenAIQuery extends OpenAIApi {
     return this.sendRequest(completionPrompt);
   } 
 
-  private async sendRequest(prompt: string, model = 'code-davinci-002') {
+  private async sendRequest(prompt: string) {
     // Create a completion request for the OpenAI API
     const request: CreateCompletionRequest = {
-      model: model,
+      model: getModel(),
       prompt: prompt,
-      temperature: 0,
-      max_tokens: 182,
+      temperature: getTemperature(),
+      max_tokens: getMaxTokens(),
       top_p: 1.0,
       frequency_penalty: 0.0,
       presence_penalty: 0.0,

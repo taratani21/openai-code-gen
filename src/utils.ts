@@ -27,6 +27,18 @@ export async function getApiKey(): Promise<string> {
   return configApiKey;
 }
 
+export function getModel(): string {
+  return getConfValue<string>('model');
+}
+
+export function getMaxTokens(): number {
+  return getConfValue<number>('maxTokens');
+}
+
+export function getTemperature(): number {
+  return getConfValue<number>('temperature');
+}
+
 export function getSelectedText(): string {
   const textEditor = vscode.window.activeTextEditor;
   return textEditor ? textEditor.document.getText(textEditor.selection) : '';
