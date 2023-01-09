@@ -48,18 +48,13 @@ export function getSelectedText(): string {
   return textEditor ? textEditor.document.getText(textEditor.selection) : '';
 }
 
-export function getActiveLanguageId(): string {
-  const textEditor = vscode.window.activeTextEditor;
-  return textEditor ? textEditor.document.languageId : '';
-}
-
 export function generateCompletionPrompt(parameters: ICompletionPromptParameters): string {
   return `##### ${parameters.instruction}\n\n${parameters.delimeter} ${parameters.inputHeader}\n${parameters.userInput}\n\n${parameters.delimeter} ${parameters.outputHeader}`;
 }
 
-export async function displayTextInNewTab(text: string) {
+export async function displayTextInNewTab(text: string, fileName = 'text.txt') {
   // Create a new URI for the text document
-  const newUri = vscode.Uri.parse('untitled:/text.txt');
+  const newUri = vscode.Uri.parse(`untitled:/${fileName}`);
 
   // Create a new text document
   const newDocument = await vscode.workspace.openTextDocument(newUri);
@@ -75,11 +70,11 @@ export async function displayTextInNewTab(text: string) {
   vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
 }
 
-export async function displayDifferencesBetweenTexts(text1: string, text2: string) {
+export async function displayDifferencesBetweenTexts(text1: string, text2: string, fileName = 'text.txt') {
   const diff = vscode.TextEdit.replace(new vscode.Range(0, 0, 0, text1.length), text2);
 
   // show diff in new tab
-  const newUri = vscode.Uri.parse('untitled:/text.txt');
+  const newUri = vscode.Uri.parse(`untitled:/${fileName}}`);
   const newDocument =  await vscode.workspace.openTextDocument(newUri);
   const edit = new vscode.WorkspaceEdit();
   edit.set(newUri, [diff]);

@@ -24,24 +24,24 @@ const OpenAICommands: ICommandConfig[] = [
 
 async function refactorCode(openAIQuery: OpenAIQuery) {
   const result = await openAIQuery.refactorSelectedCode();
-  displayTextInNewTab(result);
+  displayTextInNewTab(result, `refactor.${openAIQuery.fileExtension}`);
 }
 
 async function addComments(openAIQuery: OpenAIQuery) {
   const result = await openAIQuery.addCommentsToSelectedCode();
-  displayTextInNewTab(result);
+  displayTextInNewTab(result, `comments.${openAIQuery.fileExtension}`);
 }
 
 async function generateUnitTest(openAIQuery: OpenAIQuery) {
   const result = await openAIQuery.generateUnitTestForSelectedCode();
-  displayTextInNewTab(result);
+  displayTextInNewTab(result, `test.${openAIQuery.fileExtension}`);
 }
 
 async function sendTextRequest(openAIQuery: OpenAIQuery) {
   // Ask user for prompt
   const prompt = await vscode.window.showInputBox({
     placeHolder: 'Enter your prompt',
-    prompt: 'Enter your prompt'
+    prompt: 'Enter your prompt for Open AI to complete'
   });
 
   const result = await openAIQuery.sendRequest(`${prompt}\n###`, false);

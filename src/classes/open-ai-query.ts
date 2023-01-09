@@ -1,23 +1,31 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
 import { Configuration, ConfigurationParameters, CreateCompletionRequest, OpenAIApi } from 'openai';
-import { createDiscreteProgressStatus, generateCompletionPrompt, getActiveLanguageId, getCodeModel, getMaxTokens, getSelectedText, getTemperature, getTextModel } from '../utils';
+import { createDiscreteProgressStatus, generateCompletionPrompt, getCodeModel, getMaxTokens, getSelectedText, getTemperature, getTextModel } from '../utils';
 
 export class OpenAIQuery extends OpenAIApi {
+
+  get languageId(): string {
+    const textEditor = vscode.window.activeTextEditor;
+    return textEditor ? textEditor.document.languageId : '';
+  }
+
+  get fileExtension(): string {
+    const regex = /(?:\.([^.]+))?$/;
+    return regex.exec(vscode.window.activeTextEditor?.document.fileName || '')?.[1] || '';
+  }
+
   constructor(config: ConfigurationParameters) {
     super(new Configuration(config));
   }
 
   public async refactorSelectedCode() {
-    // Get the selected text in the provided text editor
-    const languageId = getActiveLanguageId();
-
     // generate completion prompt
     const completionPrompt = generateCompletionPrompt({
         instruction: 'Refactor the code below',
         userInput: getSelectedText(),
-        inputHeader: `Original ${languageId} code`,
-        outputHeader: `Refactored ${languageId} code`,
+        inputHeader: `Original ${this.languageId} code`,
+        outputHeader: `Refactored ${this.languageId} code`,
         delimeter: '###'
     });
 
@@ -26,15 +34,12 @@ export class OpenAIQuery extends OpenAIApi {
   }
 
   public async addCommentsToSelectedCode() {
-    // Get the selected text in the provided text editor
-    const languageId = getActiveLanguageId();
-
     // generate completion prompt
     const completionPrompt = generateCompletionPrompt({
         instruction: 'Add comments to the below code', 
         userInput: getSelectedText(),
-        inputHeader: `Uncommented ${languageId} code`,
-        outputHeader: `Commented ${languageId} code`,
+        inputHeader: `Uncommented ${this.languageId} code`,
+        outputHeader: `Commented ${this.languageId} code`,
         delimeter: '###'
     });
   
@@ -43,15 +48,12 @@ export class OpenAIQuery extends OpenAIApi {
   }
 
   public async generateUnitTestForSelectedCode() {
-    // Get the selected text in the provided text editor
-    const languageId = getActiveLanguageId();
-
     // generate completion prompt
     const completionPrompt = generateCompletionPrompt({
       instruction: 'Write a unit test for the below code',
       userInput: getSelectedText(),
-      inputHeader: `${languageId} code block`,
-      outputHeader: `Unit test for ${languageId} code block`,
+      inputHeader: `${this.languageId} code block`,
+      outputHeader: `Unit test for ${this.languageId} code block`,
       delimeter: '###'
     });
 
