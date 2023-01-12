@@ -2,70 +2,28 @@
 import * as vscode from 'vscode';
 import { Configuration, ConfigurationParameters, CreateCompletionRequest, OpenAIApi } from 'openai';
 import { createDiscreteProgressStatus, generateCompletionPrompt, getCodeModel, getMaxTokens, getSelectedText, getTemperature, getTextModel } from '../utils';
+import { OpenAICommands } from '../enums/open-ai-commands.enum';
 
 export class OpenAIQuery extends OpenAIApi {
 
-  get languageId(): string {
-    const textEditor = vscode.window.activeTextEditor;
-    return textEditor ? textEditor.document.languageId : '';
-  }
-
-  get fileExtension(): string {
-    const regex = /(?:\.([^.]+))?$/;
-    return regex.exec(vscode.window.activeTextEditor?.document.fileName || '')?.[1] || '';
+  get languageId() {
+    return vscode.window.activeTextEditor?.document.languageId || '';
   }
 
   constructor(config: ConfigurationParameters) {
     super(new Configuration(config));
   }
-
-  public async refactorSelectedCode() {
-    // generate completion prompt
-    const completionPrompt = generateCompletionPrompt({
-        instruction: 'Refactor the code below',
-        userInput: getSelectedText(),
-        inputHeader: `Original ${this.languageId} code`,
-        outputHeader: `Refactored ${this.languageId} code`,
-        delimeter: '###'
-    });
-
-    // Use the OpenAI API to request a refactored version of the selected code
-    return this.sendRequest(completionPrompt);
-  }
-
-  public async addCommentsToSelectedCode() {
-    // generate completion prompt
-    const completionPrompt = generateCompletionPrompt({
-        instruction: 'Add comments to the below code', 
-        userInput: getSelectedText(),
-        inputHeader: `Uncommented ${this.languageId} code`,
-        outputHeader: `Commented ${this.languageId} code`,
-        delimeter: '###'
-    });
   
-    // Use the OpenAI API to request comments for the selected code
-    return this.sendRequest(completionPrompt);
+  public async executeCommand(command: OpenAICommands, codeCompletion = true) {
+    const request = this.createRequest(command, codeCompletion);
+    return this.sendRequest(request);
   }
 
-  public async generateUnitTestForSelectedCode() {
-    // generate completion prompt
-    const completionPrompt = generateCompletionPrompt({
-      instruction: 'Write a unit test for the below code',
-      userInput: getSelectedText(),
-      inputHeader: `${this.languageId} code block`,
-      outputHeader: `Unit test for ${this.languageId} code block`,
-      delimeter: '###'
-    });
-
-    // Use the OpenAI API to request unit tests for the selected code
-    return this.sendRequest(completionPrompt);
-  } 
-
-  async sendRequest(prompt: string, codeCompletion = true) {
+  public createRequest(command: OpenAICommands, codeCompletion = true, prompt?: string) {
     // Create a completion request for the OpenAI API
     const request: CreateCompletionRequest = {
       model: codeCompletion ? getCodeModel() : getTextModel(),
-      prompt: prompt,
+      prompt: prompt || this.generatePrompt(command),
       temperature: getTemperature(),
       max_tokens: getMaxTokens(),
       top_p: 1.0,
@@ -74,7 +32,40 @@ export class OpenAIQuery extends OpenAIApi {
       stop: ['###'],
       best_of: 1,
     };
+    return request;
+  }
+  
+  private generatePrompt(command: OpenAICommands) {
+    const instructionMap: { [key: string]: string } = {
+      [OpenAICommands.AddComments]: 'Add comments to the below code',
+      [OpenAICommands.GenerateUnitTest]: 'Write a unit test for the below code',
+      [OpenAICommands.RefactorCode]: 'Refactor the code below',
+    };
+    const inputHeaderMap: { [key: string]: string } = {
+      [OpenAICommands.AddComments]: `${this.languageId} code without comments`,
+      [OpenAICommands.GenerateUnitTest]: `${this.languageId} code block`,
+      [OpenAICommands.RefactorCode]: `Original ${this.languageId} code`,
+    };
+    const outputHeaderMap: { [key: string]: string } = {
+      [OpenAICommands.AddComments]: `${this.languageId} code with comments`,
+      [OpenAICommands.GenerateUnitTest]: `Unit test for ${this.languageId} code block`,
+      [OpenAICommands.RefactorCode]: `Refactored ${this.languageId} code`,
+    };
+  
+    const instruction = instructionMap[command] || '';
+    const inputHeader = inputHeaderMap[command] || '';
+    const outputHeader = outputHeaderMap[command] || '';
+  
+    return generateCompletionPrompt({
+      instruction,
+      userInput: getSelectedText(),
+      inputHeader,
+      outputHeader,
+      delimeter: '###'
+    });
+  }
 
+  async sendRequest(request: CreateCompletionRequest) {
     const progressStatus = createDiscreteProgressStatus();
   
     // Use the OpenAI API to request comments for the code

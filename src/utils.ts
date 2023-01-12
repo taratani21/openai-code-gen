@@ -52,40 +52,21 @@ export function generateCompletionPrompt(parameters: ICompletionPromptParameters
   return `##### ${parameters.instruction}\n\n${parameters.delimeter} ${parameters.inputHeader}\n${parameters.userInput}\n\n${parameters.delimeter} ${parameters.outputHeader}`;
 }
 
-export async function displayTextInNewTab(text: string, fileName = 'text.txt') {
-  // Create a new URI for the text document
-  const newUri = vscode.Uri.parse(`untitled:/${fileName}`);
-
-  // Create a new text document
-  const newDocument = await vscode.workspace.openTextDocument(newUri);
-
-  // Update the content of the new text document
-  const newText = new vscode.TextEdit(new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0)), text);
-  const newEdits = [newText];
-  const edit = new vscode.WorkspaceEdit();
-  edit.set(newUri, newEdits);
-  await vscode.workspace.applyEdit(edit);
-
-  // Open the new text document in a new tab
-  vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
-}
-
-export async function displayDifferencesBetweenTexts(text1: string, text2: string, fileName = 'text.txt') {
-  const diff = vscode.TextEdit.replace(new vscode.Range(0, 0, 0, text1.length), text2);
-
-  // show diff in new tab
-  const newUri = vscode.Uri.parse(`untitled:/${fileName}}`);
-  const newDocument =  await vscode.workspace.openTextDocument(newUri);
-  const edit = new vscode.WorkspaceEdit();
-  edit.set(newUri, [diff]);
-  await vscode.workspace.applyEdit(edit);
-  vscode.window.showTextDocument(newDocument, vscode.ViewColumn.Beside, true);
-}
-
 export function createDiscreteProgressStatus(message = 'Fetching OpenAI results...'): vscode.StatusBarItem {
   const progressStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   progressStatus.text = `$(sync~spin) ${message}`;
   progressStatus.show();
 
   return progressStatus;
+}
+
+export function getNonce(): string {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+
+  return text;
 }

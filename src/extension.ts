@@ -1,60 +1,46 @@
+/* eslint-disable no-case-declarations */
 import * as vscode from 'vscode';
+import { OpenAIPanel } from './classes/open-ai-panel';
 import { OpenAIQuery } from './classes/open-ai-query';
-import { ICommandConfig } from './interfaces/command-config';
-import { displayTextInNewTab, getApiKey } from './utils';
-
-const OpenAICommands: ICommandConfig[] = [
-  {
-    command: 'openaicodegen.refactorCode',
-    callback: refactorCode
-  },
-  {
-    command: 'openaicodegen.addComments',
-    callback: addComments
-  },
-  {
-    command: 'openaicodegen.generateUnitTest',
-    callback: generateUnitTest
-  },
-  {
-    command: 'openaicodegen.sendTextRequest',
-    callback: sendTextRequest
-  }
-];
-
-async function refactorCode(openAIQuery: OpenAIQuery) {
-  const result = await openAIQuery.refactorSelectedCode();
-  displayTextInNewTab(result, `refactor.${openAIQuery.fileExtension}`);
-}
-
-async function addComments(openAIQuery: OpenAIQuery) {
-  const result = await openAIQuery.addCommentsToSelectedCode();
-  displayTextInNewTab(result, `comments.${openAIQuery.fileExtension}`);
-}
-
-async function generateUnitTest(openAIQuery: OpenAIQuery) {
-  const result = await openAIQuery.generateUnitTestForSelectedCode();
-  displayTextInNewTab(result, `test.${openAIQuery.fileExtension}`);
-}
-
-async function sendTextRequest(openAIQuery: OpenAIQuery) {
-  // Ask user for prompt
-  const prompt = await vscode.window.showInputBox({
-    placeHolder: 'Enter your prompt',
-    prompt: 'Enter your prompt for Open AI to complete'
-  });
-
-  const result = await openAIQuery.sendRequest(`${prompt}\n###`, false);
-  displayTextInNewTab(result);
-}
+import { OpenAICommands } from './enums/open-ai-commands.enum';
+import { getApiKey } from './utils';
 
 export async function activate(context: vscode.ExtensionContext) {
   const apiKey = await getApiKey();
 
   const openAIQuery = new OpenAIQuery({ apiKey });
-  const disposables = OpenAICommands.map(command => {
-    return vscode.commands.registerCommand(command.command, command.callback.bind(null, openAIQuery));
+  const disposables = Object.values(OpenAICommands).map((command) => {
+    const handler = commandHandler.bind(null, openAIQuery, command, context.extensionUri);
+    return vscode.commands.registerCommand(command, handler);
   });
 
   context.subscriptions.push(...disposables);
+}
+
+export function getUserPrompt() {
+  return vscode.window.showInputBox({
+    placeHolder: 'Enter your prompt',
+    prompt: 'Enter your prompt for Open AI to complete',
+  });
+}
+
+export async function commandHandler(query: OpenAIQuery, command: OpenAICommands, extensionUri: vscode.Uri) {
+  OpenAIPanel.createOrShow(extensionUri);
+
+  let response = '';
+  switch (command) {
+    case OpenAICommands.RefactorCode:
+    case OpenAICommands.AddComments:
+    case OpenAICommands.GenerateUnitTest:
+      response = await query.executeCommand(command);
+      break;
+
+    case OpenAICommands.SendTextRequest:
+      const prompt = await getUserPrompt() || '';
+      const request = query.createRequest(command, false, prompt);
+      response = await query.sendRequest(request);
+      break;
+  }
+
+  OpenAIPanel.currentPanel?.update(response);
 }
